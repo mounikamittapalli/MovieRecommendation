@@ -1,39 +1,25 @@
-
-
 import streamlit as st
 import pickle
-import streamlit as st
 import pandas as pd
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
-import requests
 
-# Streamlit UI
-movies=pickle.load(open("movies_list.pkl",'rb'))
-similarity=pickle.load(open("similarity.pkl",'rb'))
+# Load pickled data
+movies = pickle.load(open("movieslist.pkl", "rb"))
+top_sim_indices = pickle.load(open("top_sim_indices.pkl", "rb"))
+
+# List of movie titles for dropdown
 movie_list = movies['original_title'].values
 
-
-def recommand(movie):
-    index=movies[movies['original_title']==movie].index[0]
-    distance = sorted(list(enumerate(similarity[index])), key=lambda vector: vector[1], reverse=True)
-    recommend_movie=[]
-# Print top 5 results (after the first one which is usually the same item)
-    for i in distance[0:5]:
-        recommend_movie.append(movies.iloc[i[0]].original_title)
-    return recommend_movie
+def recommend(movie_title):
+    index = movies[movies['original_title'] == movie_title].index[0]
+    recommended = [movies.iloc[i].original_title for i in top_sim_indices[index][:5]]
+    return recommended
 
 st.title("🎬 Movie Recommendation System")
 
 selected_movie = st.selectbox("Choose a movie", movie_list)
 
 if st.button("Show Recommendations"):
-    recommendations = recommand(movie_list)
+    recommendations = recommend(selected_movie)
     st.subheader("Top 5 similar movies:")
     for movie in recommendations:
         st.write(f"🎬 {movie}")
-
-
-
-
-
